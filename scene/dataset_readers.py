@@ -23,6 +23,8 @@ from plyfile import PlyData, PlyElement
 from utils.sh_utils import SH2RGB
 from scene.gaussian_model import BasicPointCloud
 
+from pdb import set_trace as st
+
 class CameraInfo(NamedTuple):
     uid: int
     R: np.array
@@ -231,6 +233,7 @@ def readNerfSyntheticInfo(path, white_background, eval, extension=".png"):
     nerf_normalization = getNerfppNorm(train_cam_infos)
 
     ply_path = os.path.join(path, "points3d.ply")
+    
     if not os.path.exists(ply_path):
         # Since this data set has no colmap data, we start with random points
         num_pts = 100_000
@@ -242,6 +245,8 @@ def readNerfSyntheticInfo(path, white_background, eval, extension=".png"):
         pcd = BasicPointCloud(points=xyz, colors=SH2RGB(shs), normals=np.zeros((num_pts, 3)))
 
         storePly(ply_path, xyz, SH2RGB(shs) * 255)
+    else:
+        print("We will load from existing plt path: {}!".format(ply_path))
     try:
         pcd = fetchPly(ply_path)
     except:
