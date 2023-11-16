@@ -13,6 +13,7 @@ import torch
 from torch import nn
 import numpy as np
 from utils.graphics_utils import getWorld2View2, getProjectionMatrix
+from pdb import set_trace as st
 
 class Camera(nn.Module):
     def __init__(self, colmap_id, R, T, FoVx, FoVy, image, gt_alpha_mask,
@@ -23,7 +24,7 @@ class Camera(nn.Module):
 
         self.uid = uid
         self.colmap_id = colmap_id
-        self.R = R
+        self.R = R # R is the transpose of w2c's rotation
         self.T = T
         self.FoVx = FoVx
         self.FoVy = FoVy
@@ -45,16 +46,22 @@ class Camera(nn.Module):
         else:
             self.original_image *= torch.ones((1, self.image_height, self.image_width), device=self.data_device)
 
-        self.zfar = 100.0
-        self.znear = 0.01
+        # self.zfar = 100.0
+        # self.znear = 0.01
+        self.zfar = -100
+        self.znear = 1000
+        print(f"self.znear = {self.znear}, self.zfar = {self.zfar}")
 
         self.trans = trans
         self.scale = scale
 
         self.world_view_transform = torch.tensor(getWorld2View2(R, T, trans, scale)).transpose(0, 1).cuda()
         self.projection_matrix = getProjectionMatrix(znear=self.znear, zfar=self.zfar, fovX=self.FoVx, fovY=self.FoVy).transpose(0,1).cuda()
+        # st()
         self.full_proj_transform = (self.world_view_transform.unsqueeze(0).bmm(self.projection_matrix.unsqueeze(0))).squeeze(0)
         self.camera_center = self.world_view_transform.inverse()[3, :3]
+        # print(f"camera_center with [3, :3]{self.camera_center}")
+        # st()
 
 class MiniCam:
     def __init__(self, width, height, fovy, fovx, znear, zfar, world_view_transform, full_proj_transform):

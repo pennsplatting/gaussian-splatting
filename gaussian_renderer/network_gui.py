@@ -76,6 +76,7 @@ def receive():
             world_view_transform[:,2] = -world_view_transform[:,2]
             full_proj_transform = torch.reshape(torch.tensor(message["view_projection_matrix"]), (4, 4)).cuda()
             full_proj_transform[:,1] = -full_proj_transform[:,1]
+            # print(f"-----znear={znear}, zfar={zfar}")
             custom_cam = MiniCam(width, height, fovy, fovx, znear, zfar, world_view_transform, full_proj_transform)
         except Exception as e:
             print("")

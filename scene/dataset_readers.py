@@ -184,6 +184,8 @@ def readCamerasFromTransforms(path, transformsfile, white_background, extension=
     with open(os.path.join(path, transformsfile)) as json_file:
         contents = json.load(json_file)
         fovx = contents["camera_angle_x"]
+        # fovx = 0.6911112070083618
+        print(f'contents["camera_angle_x"]:{fovx}')
 
         frames = contents["frames"]
         for idx, frame in enumerate(frames):
@@ -193,7 +195,8 @@ def readCamerasFromTransforms(path, transformsfile, white_background, extension=
             c2w = np.array(frame["transform_matrix"])
             # change from OpenGL/Blender camera axes (Y up, Z back) to COLMAP (Y down, Z forward)
             c2w[:3, 1:3] *= -1
-
+            
+           
             # get the world-to-camera transform and set R, T
             w2c = np.linalg.inv(c2w)
             R = np.transpose(w2c[:3,:3])  # R is stored transposed due to 'glm' in CUDA code
